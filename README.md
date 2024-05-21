@@ -15,7 +15,6 @@ City Guide, kullanıcıların şehirdeki önemli yerleri keşfetmelerine yardım
 
 ### Layout ve UI elemanları
 Uygulamada kullanılan layout ve UI elemanları:
-#### Uygulamada Kullanılan Layout ve UI Elemanları
 
 #### 1. RecyclerView
 - **Kullanım Amacı**: Yerler listesini göstermek.
