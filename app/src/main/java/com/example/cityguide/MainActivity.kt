@@ -30,6 +30,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.LaunchedEffect
 import com.example.cityguide.ui.popular.PopularScreen
 import android.Manifest
+import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -37,22 +38,26 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 
 class MainActivity : ComponentActivity() {
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val viewModel: MainViewModel by viewModels {
+                MainViewModelFactory(application)
+            }
             if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
                 permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
-
-                val viewModel: MainViewModel by viewModels()
+                // Konum izni verildi
                 viewModel.startLocationUpdates(this)
             } else {
-
-                val viewModel: MainViewModel by viewModels()
+                // Konum izni reddedildi
                 viewModel.sendLocationPermissionDeniedNotification(this)
             }
         }
@@ -76,14 +81,18 @@ class MainActivity : ComponentActivity() {
                 ))
             } else {
                 // Konum izni zaten verilmiş
-                val viewModel: MainViewModel by viewModels()
+                val viewModel: MainViewModel by viewModels {
+                    MainViewModelFactory(application)
+                }
                 viewModel.startLocationUpdates(this)
             }
         }
 
         setContent {
             CityGuideTheme {
-                val viewModel: MainViewModel by viewModels()
+                val viewModel: MainViewModel by viewModels {
+                    MainViewModelFactory(application)
+                }
                 CityGuideApp(viewModel, apiKey)
             }
         }
@@ -164,8 +173,6 @@ fun NavigationGraph(navController: NavHostController, viewModel: MainViewModel, 
     }
 }
 
-
-
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object Home : Screen("home", "Home", Icons.Filled.Home)
     object Map : Screen("map", "Map", Icons.Filled.LocationOn)
@@ -179,7 +186,18 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 @Composable
 fun DefaultPreview() {
     CityGuideTheme {
-        val viewModel = MainViewModel()
+        val context = LocalContext.current
+        val viewModel = MainViewModel(context.applicationContext as Application)
         CityGuideApp(viewModel, "AIzaSyCIT4GyCJfb50aStL3UYb9aUSsfee-6kZ8")
+    }
+}
+
+class MainViewModelFactory(private val application: Application) : ViewModelProvider.AndroidViewModelFactory(application) {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return MainViewModel(application) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

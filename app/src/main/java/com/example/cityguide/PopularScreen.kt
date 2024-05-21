@@ -166,7 +166,7 @@ fun PopularScreen(navController: NavHostController, viewModel: MainViewModel = v
                     }
                 }
             } else {
-                Text(text = "No popular places found.", style = MaterialTheme.typography.bodyLarge)
+                Text(text = "", style = MaterialTheme.typography.bodyLarge)
             }
         }
     }

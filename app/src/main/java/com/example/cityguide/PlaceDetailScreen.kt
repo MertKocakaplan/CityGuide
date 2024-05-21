@@ -157,3 +157,4 @@ fun DetailText(label: String, text: String) {
         )
     }
 }
+

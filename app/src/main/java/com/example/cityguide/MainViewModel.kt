@@ -17,9 +17,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import android.util.Log
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import android.app.Application
+import android.content.SharedPreferences
+import androidx.lifecycle.AndroidViewModel
 
-class MainViewModel : ViewModel() {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val placesService = PlacesService.create()
+    private val sharedPreferences: SharedPreferences = application.getSharedPreferences("favorites_prefs", Context.MODE_PRIVATE)
     val places: MutableStateFlow<List<Place>> = MutableStateFlow(emptyList())
     val placeDetails: MutableStateFlow<Place?> = MutableStateFlow(null)
     val popularPlaces: MutableStateFlow<List<Place>> = MutableStateFlow(emptyList())
@@ -27,12 +33,10 @@ class MainViewModel : ViewModel() {
     private val _searchResults: MutableStateFlow<List<Place>> = MutableStateFlow(emptyList())
     val searchResults: StateFlow<List<Place>> = _searchResults
 
-
-    private val _favorites: MutableStateFlow<List<Place>> = MutableStateFlow(emptyList())
+    private val _favorites: MutableStateFlow<List<Place>> = MutableStateFlow(loadFavorites())
     val favorites: StateFlow<List<Place>> = _favorites
 
-
-    private var fusedLocationClient: FusedLocationProviderClient? = null
+    private var fusedLocationClient: FusedLocationProviderClient? = LocationServices.getFusedLocationProviderClient(application)
     private var locationCallback: LocationCallback? = null
 
     fun setUserLocation(lat: Double, lng: Double) {
@@ -146,12 +150,27 @@ class MainViewModel : ViewModel() {
     // Favorilere ekleme ve çıkarma fonksiyonları
     fun addToFavorites(place: Place) {
         if (!_favorites.value.contains(place)) {
-            _favorites.value = _favorites.value + place
+            val newFavorites = _favorites.value + place
+            _favorites.value = newFavorites
+            saveFavorites(newFavorites)
         }
     }
 
     fun removeFromFavorites(place: Place) {
-        _favorites.value = _favorites.value - place
+        val newFavorites = _favorites.value - place
+        _favorites.value = newFavorites
+        saveFavorites(newFavorites)
+    }
+
+    private fun loadFavorites(): List<Place> {
+        val json = sharedPreferences.getString("favorites", null) ?: return emptyList()
+        val type = object : TypeToken<List<Place>>() {}.type
+        return Gson().fromJson(json, type)
+    }
+
+    private fun saveFavorites(favorites: List<Place>) {
+        val json = Gson().toJson(favorites)
+        sharedPreferences.edit().putString("favorites", json).apply()
     }
 
     fun isFavorite(place: Place): Boolean {
