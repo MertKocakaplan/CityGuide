@@ -57,7 +57,7 @@ fun PopularScreen(navController: NavHostController, viewModel: MainViewModel = v
             decorationBox = { innerTextField ->
                 Box(
                     Modifier
-                        .background(Color.White)
+                        .background(Color.White, shape = MaterialTheme.shapes.medium)
                         .padding(8.dp)
                 ) {
                     if (countryQuery.isEmpty()) {
@@ -69,7 +69,7 @@ fun PopularScreen(navController: NavHostController, viewModel: MainViewModel = v
         )
 
         if (filteredCountries.isNotEmpty()) {
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            LazyColumn(modifier = Modifier.fillMaxWidth().background(Color.White, shape = MaterialTheme.shapes.medium).padding(8.dp)) {
                 items(filteredCountries) { country ->
                     DropdownMenuItem(
                         text = { Text(country.name) },
@@ -111,7 +111,7 @@ fun PopularScreen(navController: NavHostController, viewModel: MainViewModel = v
                 decorationBox = { innerTextField ->
                     Box(
                         Modifier
-                            .background(Color.White)
+                            .background(Color.White, shape = MaterialTheme.shapes.medium)
                             .padding(8.dp)
                     ) {
                         if (cityQuery.isEmpty()) {
@@ -123,7 +123,7 @@ fun PopularScreen(navController: NavHostController, viewModel: MainViewModel = v
             )
 
             if (filteredCities.isNotEmpty()) {
-                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                LazyColumn(modifier = Modifier.fillMaxWidth().background(Color.White, shape = MaterialTheme.shapes.medium).padding(8.dp)) {
                     items(filteredCities) { city ->
                         DropdownMenuItem(
                             text = { Text(city) },
